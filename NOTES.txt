@@ -1,0 +1,46 @@
+Project:
+
+1. Using Terraform create a VPC and launch an auto scaling group where the instances are in a private subnet. 
+   With your instances in the private subnet, 
+   configure it so a system administrator can access the server to debug an issue, 
+   without going through a public bastion host.
+
+    - 1 VPC
+    - 2 private subnets in 2 AZs
+    - ASG - Launch Template
+    - ALB in public
+    - Add SSM role so that System Admins can use session manager to access instances. 
+        - Create  ssm endpoints
+            # com.amazonaws.us-east-1.ssm
+            # com.amazonaws.us-east-1.ssmmessages
+        - Security groups should have ssh & https open to vpc cidr
+        - Agent should be installed on instance. 
+    - Need nat gateway.
+
+
+
+
+
+
+2. Create a Gitlab CICD pipeline to create a new Amazon Linux 2 based “Golden Image” AMI. 
+   The resulting AMI should have Docker installed. 
+   When the AMI is deployed it should start a Docker container of your choice.
+
+    - I will use Jenkins first, since I am more familiar with it. 
+    - Spin up regular Amazon Linux 2 instance 
+    - Install Docker on it.
+    - Create and image from that instance.
+    - Create an EC2 instance from that image 
+        - Pass user data with dockerfile in it
+            sudo echo "FROM ubuntu" >> /home/ec2-user/Dockerfile
+            sudo echo "RUN apt-get update -y" >> /home/ec2-user/Dockerfile
+            sudo echo "RUN apt-get install nginx -y" >> /home/ec2-user/Dockerfile
+            sudo echo "COPY index.html /var/www/html" >>/home/ec2-user/Dockerfile
+            sudo echo "CMD [\"sh\"]" >>/home/ec2-user/Dockerfile
+            sudo echo "CMD nginx -g 'daemon off;'" >>/home/ec2-user/Dockerfile
+
+            sudo docker build /home/ec2-user/. -t merra_image:yellow
+            sudo docker run -dt -p 82:80 merra_image:yellow
+
+        - OR just Pass user data with command to run nginx 
+            - docker run -dt -p 83:80 nginx
