@@ -1,7 +1,7 @@
 // Module
 
 module "VPC" {
-    source = "../../Hernandez-Project1"
+    source = "git::https://gitlab.com/ajamb923/hernandez-project.git"                   #"../../Hernandez-Project1"
     ami                 = "ami-005f9685cb30f234b"
     key_name            = "NOVA_KP"
     instance_type       = "t2.micro"
