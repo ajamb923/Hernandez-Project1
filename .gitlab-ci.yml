@@ -16,6 +16,7 @@ before_script:
 stages:
   - format
   - validate
+  - init
   - plan
   - create docker instance
   - create golden image
@@ -30,9 +31,16 @@ format:
 validate:
   stage: validate
   script:
-    - terraform validate
+    - terraform -chdir=Golden-Image-Project2 validate
   dependencies:
     - format
+
+init:
+  stage: init
+  script:
+    - terraform -chdir=Golden-Image-Project2 init -reconfigure
+  dependencies:
+    - validate
 
 plan:
   stage: plan
@@ -42,7 +50,7 @@ plan:
     paths:
       - planfile
   dependencies:
-    - validate
+    - init
 
 create docker instance:
   stage: create docker instance
