@@ -44,3 +44,10 @@ Project:
 
         - OR just Pass user data with command to run nginx 
             - docker run -dt -p 83:80 nginx
+
+
+        High level:
+        - Create an instance, pas user data in it that will run docker 
+        - then create ami from that instnace 
+            resource "aws_ami_from_instance" 
+        run apply -target resource "aws_ami_from_instance" depending on other creation.

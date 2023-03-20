@@ -1,0 +1,169 @@
+image:
+  name: hashicorp/terraform
+  entrypoint: [""]
+    
+
+variables:
+  AWS_DEFAULT_REGION: ${AWS_REGION}
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+  AWS_SECRET_ACCESS_KEY : ${AWS_SECRET_ACCESS_KEY}
+
+before_script:
+  - rm -rf .terraform
+  - terraform --version
+  - terraform init -reconfigure
+
+stages:
+  - format
+  - validate
+  - plan
+  - create docker instance
+  - create golden image
+  - create golden instance
+  - destroy
+
+format:
+  stage: format
+  script:
+    - terraform fmt
+
+validate:
+  stage: validate
+  script:
+    - terraform validate
+  dependencies:
+    - format
+
+plan:
+  stage: plan
+  script:
+    - terraform plan -out "planfile"
+  artifacts:
+    paths:
+      - planfile
+  dependencies:
+    - validate
+
+create docker instance:
+  stage: create docker instance
+  allow_failure: true
+  script:
+    #- terraform apply -auto-approve -input=false "planfile"
+    - terraform apply -target aws_instance.docker-instance -target module.VPC -auto-approve -input=false "planfile"
+  dependencies:
+    - plan
+  when: manual
+
+
+create golden image:
+  stage: create golden image
+  allow_failure: true
+  script:
+    #- terraform apply -auto-approve -input=false "planfile"
+    - terraform apply -target aws_ami_from_instance.golden-image -auto-approve -input=false "planfile" 
+  dependencies:
+    - create docker instance
+  when: manual
+
+
+create golden instance:
+  stage: create golden instance
+  allow_failure: true
+  script:
+    #- terraform apply -auto-approve -input=false "planfile"
+    - terraform apply -target aws_instance.golden-instance -auto-approve -input=false "planfile"
+  dependencies:
+    - create golden image
+  when: manual
+
+
+destroy: 
+  stage: destroy
+  script:
+    - terraform destroy --auto-approve 
+  dependencies:
+     - create golden instance
+  when: manual
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# image:
+#   name: hashicorp/terraform:light
+#   #name: registry.gitlab.com/gitlab-org/gitlab-build-images:terraform
+#   entrypoint:
+#     - '/usr/bin/env'
+#     - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+# variables:
+#   AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+#   AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+#   AWS_SECRET_ACCESS_KEY : ${AWS_SECRET_ACCESS_KEY}
+
+# before_script:
+#   - rm -rf .terraform
+#   - terraform --version
+#   - terraform init
+
+# stages:
+#   #- format
+#   - validate
+#   - plan
+#   - apply
+#   - destroy
+
+# # format:
+# #   stage: format
+# #   script:
+# #     - terraform fmt -check -diff
+
+# validate:
+#   stage: validate
+#   script:
+#     - terraform validate
+#   # dependencies:
+#   #   - format
+
+# plan:
+#   stage: plan
+#   script:
+#     - terraform plan -out "planfile"
+#   artifacts:
+#     paths:
+#       - planfile
+#   dependencies:
+#     - validate
+
+# apply:
+#   stage: apply
+#   allow_failure: true # Setting this option to true will allow the job to fail while still letting the pipeline pass.
+#   script:
+#     - terraform apply -input=false "planfile"
+#   dependencies:
+#     - plan
+#   when: manual
+
+# destroy: 
+#   stage: destroy
+#   script:
+#     - terraform destroy --auto-approve 
+#   dependencies:
+#     - apply
+#   when: manual

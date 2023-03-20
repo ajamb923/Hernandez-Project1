@@ -76,3 +76,42 @@ resource "aws_security_group" "eight-alb-sg" {
     Name = "EIGHT_ALB_SG"
   }
 }
+
+
+
+
+/*  Create Security Group for Docker/Golden */
+#--------------------------------------------#
+
+resource "aws_security_group" "docker-golden-sg" {
+  name        = "Docker-Golden-sg"
+  description = "Allow web inbound traffic"
+  vpc_id      = aws_vpc.eight-vpc.id
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 85
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "EIGHT_ALB_SG"
+  }
+}

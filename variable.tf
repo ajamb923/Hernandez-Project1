@@ -39,6 +39,17 @@ variable "public_subnet_cidr" {
 }
 
 
+variable "create_ALB" {
+  description = "Do you want to create an ALB"
+}
+
+variable "create_AutoScaling" {
+  description = "Do you want to create an AutoScaling"
+}
+
+
+
+
 # variable "sg_ports" {
 #   description = "Ports for security group ingress rules"
 # }
