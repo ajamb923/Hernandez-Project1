@@ -37,7 +37,7 @@ validate:
 plan:
   stage: plan
   script:
-    - terraform plan -out "planfile"
+    - terraform plan -target aws_instance.docker-instance -target module.VPC -out "planfile"
   artifacts:
     paths:
       - planfile
@@ -49,7 +49,7 @@ create docker instance:
   allow_failure: true
   script:
     #- terraform apply -auto-approve -input=false "planfile"
-    - terraform apply -target aws_instance.docker-instance -target module.VPC -auto-approve -input=false "planfile"
+    - terraform apply -target aws_instance.docker-instance -target module.VPC -auto-approve -input=false #"planfile"
   dependencies:
     - plan
   when: manual
@@ -60,7 +60,7 @@ create golden image:
   allow_failure: true
   script:
     #- terraform apply -auto-approve -input=false "planfile"
-    - terraform apply -target aws_ami_from_instance.golden-image -auto-approve -input=false "planfile" 
+    - terraform apply -target aws_ami_from_instance.golden-image -auto-approve -input=false #"planfile" 
   dependencies:
     - create docker instance
   when: manual
@@ -71,7 +71,7 @@ create golden instance:
   allow_failure: true
   script:
     #- terraform apply -auto-approve -input=false "planfile"
-    - terraform apply -target aws_instance.golden-instance -auto-approve -input=false "planfile"
+    - terraform apply -target aws_instance.golden-instance -auto-approve -input=false #"planfile"
   dependencies:
     - create golden image
   when: manual
