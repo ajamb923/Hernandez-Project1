@@ -31,7 +31,7 @@ format:
 validate:
   stage: validate
   script:
-    - terraform -chdir=Golden-Image-Project2 validate
+    - terraform validate
   dependencies:
     - format
 
